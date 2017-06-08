@@ -67,7 +67,7 @@ swe <- ncvar_get(ncin, "swe")
 #morecams20132014<-rbind(data, data1)
 #write.csv(morecams20132014, file = "moreDaymet_bestcamsNH_2013_2014.csv")
 
-########
+######## HELP please
 # find daymet cell nearest to each camera location
   # loop through cameras
 for (icam in 1:length(camera_names))
