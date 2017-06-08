@@ -1,6 +1,6 @@
 # Alex Bryan 
 # Function that extracts lat and lon bounds for each Daymet tile
-# June 2018
+# June 2017
 
 
 tile_ids <- c(11376,11377,
