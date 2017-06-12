@@ -27,22 +27,24 @@ for (icam in 1:length(camera_names))
   tiles[icam] <- tile_ids[which(lats[,1] < camsNH$Lat[icamsNH] & lats[,2] > camsNH$Lat[icamsNH]
                                 & lons[,1] < camsNH$Lon[icamsNH] & lons[,2] > camsNH$Lon[icamsNH])]
 }
-data <- data.frame(Name=camera_names, Tile=tiles)
+cam_tiles <- data.frame(Name=camera_names, Tile=tiles)
 
-
+# This loop opens each tile that contains cameras only once (you'll want this once you start dealing with multiple tiles -- for now, it will only read in 12115 as you had)
+for (tile_id in unique(cam_tiles$Tile))
+{
+  
 #open climate data
 # Kil6, Kil8, Kins2, Jef1, Jef2, Zeal3 are in 12115; Sand1,Sand2 are in 11935
-#ncin <- nc_open(paste0(tile_id,"_2003_2004_swe.nc"))
-ncin <- nc_open("12115_2003_2004_swe.nc")
-ncin
+ncin <- nc_open(paste0(tile_id,"_2003_2004_swe.nc"))
+#ncin <- nc_open("12115_2003_2004_swe.nc")
 
 # extract variables
-time <-ncvar_get(ncin, "time") #time <- get.var.ncdf(ncin, "time") 
+#time <-ncvar_get(ncin, "time") #time <- get.var.ncdf(ncin, "time") # you don't need this yet since you are just extracting lat + lon
 # days since 1980-01-01 00:00:00 UTC
-date <- as.Date("1980-01-01") + time # convert time to date format
+#date <- as.Date("1980-01-01") + time # convert time to date format # you don't need this yet since you are just extracting lat + lon
 lat <- ncvar_get(ncin, "lat") 
 lon <- ncvar_get(ncin, "lon") 
-swe <- ncvar_get(ncin, "swe")
+#swe <- ncvar_get(ncin, "swe") # you don't need this yet unless you follow option 1 below (i.e. do swe calculations here instead of in winter metrics)
 
 # find daymet cell nearest to camera location
   # one camera at a time
@@ -70,7 +72,7 @@ swe <- ncvar_get(ncin, "swe")
 ######## HELP please
 # find daymet cell nearest to each camera location
   # loop through cameras
-for (icam in 1:length(camera_names))
+for (icam in which(cam_tiles$Tile == tile_id)) # I changed this for when you have more than 1 tile
 {
   camera <- which(camsNH$Camera == camera_names[icam])
   dlat[icam]  <- abs(lat-camsNH[camera,]$Lat)
@@ -79,8 +81,33 @@ for (icam in 1:length(camera_names))
   ilatlon[icam]  <- which(dlatlon == min(dlatlon))  # 1-dimensional lat/lon value
   ilat[icam]  <- ceiling(ilatlon/nrow(lat))         # lat value in 2 dimensions
   ilon[icam]  <- ilatlon - ((ilat - 1) * nrow(lat)) # lon value in 2 dimensions
-  swe[ilon,ilat,]                    # snow wat eqv in 3 dimensions
-  }
+  #swe[ilon,ilat,]                    # snow wat eqv in 3 dimensions
+  #  You have a couple options:
+  #    1. You could do all your calculations (winter metrics) here, working with one year at a time, one tile at a time, and one camera at a time.  Or...
+  #    2. You could wait to work with swe until later and first store the lat and lon indices (ilat and ilon) corresponding to each camera in each tile.
+  #  I have coded this assuming you want option 2.  NOTE: instead of creating a whole new data frame (like below), you can add columns to an existing data frame like so:
+  cam_tiles$lat_index[icam] <- ilat
+  cam_tiles$lon_index[icam] <- ilon
+  
+} # end camera loop
 
-data <- data.frame(Date=date, Name=camera_names, SWE=swe[ilon,ilat,], Lat=ilat, Lon=ilon)
+#data <- data.frame(Date=date, Name=camera_names, SWE=swe[ilon,ilat,], Lat=ilat, Lon=ilon)
 
+} # end tile loop
+
+# Save the cam_tile information for loading into winter_metrics.
+save(cam_tiles, file="cam_tiles.RData")
+
+# Then, in winter_metrics, you'll want to loop over cameras and years and use Tile, lat_index and lon_index columns in cam_tiles to get the appropriate tile and pixel matching the camera.
+#    Like so:
+#    for (camera in 1:length(cam_tiles)
+#    {
+#       for (year in 1980:2015)
+#       {
+#          ncin <- nc_open(paste0(cam_tiles$Tile[camera],"_",year,"_",year+1,"_swe.nc"))
+#          time <-ncvar_get(ncin, "time")
+#          date <- as.Date("1980-01-01") + time
+#          swe <- ncvar_get(ncin, "swe")
+#          winter_metric_1 <- function_for_winter_metric_1(swe[cam_tiles$lon_index,cam_tiles$lat_index,])
+#       } # end year loop
+#    } # end camera loop
