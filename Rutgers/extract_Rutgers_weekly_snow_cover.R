@@ -53,8 +53,24 @@ for (icam in 1:length(camera_names))
   snow[ilon[icam],ilat[icam],]                      # snow wat eqv in 3 dimensions
 }
 
+# save lat/lon indices that correspond to each camera in a separate data frame
+cam_latlon <- data.frame(name = camera_names, lat_ind = ilat, lon_ind = ilon)
+
 # save data (after 2014 only)
-data <- data.frame(Date=date, Name=camera_names, Snow=snow[ilon,ilat,], Lat=ilat, Lon=ilon)
+# this won't work because date and snow are 2,644 values (weeks) long and camera_names, ilat, and ilon are 43 (cameras) long
+#data <- data.frame(Date=date, Name=camera_names, Snow=snow[ilon,ilat,], Lat=ilat, Lon=ilon)
 datasubset <-subset(data, data$Date > "2014-01-01")
+
+# instead, you'll just do all your calculations using snow[cam_latlon$lon_ind[camera], cam_latlon$lat_ind[camera],] as in the procedure I added at the end of extract_daymet... (that should technically go in winter_metrics):
+for (camera in 1:length(camera_names)
+{
+  for (year in 1966:2015) # you can change the start year to 2014 to correspond with your camera data
+  {
+    time_subset <- which(date >= paste0(year,"-07-01") & date < paste0(year+1,"-07-01"))
+     
+    # do your calculations using:
+    snow[cam_latlon$lon_ind[camera],cam_latlon$lat_ind[camera],time_subset]
+  } # end year loop
+} # end camera loop
 
 
