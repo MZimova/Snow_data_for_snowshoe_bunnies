@@ -62,7 +62,7 @@ cam_latlon <- data.frame(name = camera_names, lat_ind = ilat, lon_ind = ilon)
 datasubset <-subset(data, data$Date > "2014-01-01")
 
 # instead, you'll just do all your calculations using snow[cam_latlon$lon_ind[camera], cam_latlon$lat_ind[camera],] as in the procedure I added at the end of extract_daymet... (that should technically go in winter_metrics):
-for (camera in 1:length(camera_names)
+for (camera in 1:length(camera_names))
 {
   for (year in 1966:2015) # you can change the start year to 2014 to correspond with your camera data
   {
