@@ -39,16 +39,18 @@ snow <- ncvar_get(ncin, "snow_cover_extent") #swe <- get.var.ncdf(ncin, "swe")
 #### PLEASE HELP W FUNCTION
 # find Rutgers cell nearest to each camera location
   # loop through cameras
+ilat <- numeric(length = length(camera_names))
+ilon <- numeric(length = length(camera_names))
 for (icam in 1:length(camera_names))
 {
   camera <- which(camsNH$Camera == camera_names[icam])
-  dlat[icam]  <- abs(lat-camsNH[camera,]$Lat)
-  dlon[icam]  <- abs(lon-camsNH[camera,]$Lon)
-  dlatlon[icam]  <- dlat + dlon
-  ilatlon[icam]  <- which(dlatlon == min(dlatlon))  # 1-dimensional lat/lon value
+  dlat  <- abs(lat-camsNH[camera,]$Lat)
+  dlon  <- abs(lon-camsNH[camera,]$Lon)
+  dlatlon  <- dlat + dlon
+  ilatlon  <- which(dlatlon == min(dlatlon))  # 1-dimensional lat/lon value
   ilat[icam]  <- ceiling(ilatlon/nrow(lat))         # lat value in 2 dimensions
-  ilon[icam]  <- ilatlon - ((ilat - 1) * nrow(lat)) # lon value in 2 dimensions
-  snow[ilon,ilat,]                      # snow wat eqv in 3 dimensions
+  ilon[icam]  <- ilatlon - ((ilat[icam] - 1) * nrow(lat)) # lon value in 2 dimensions
+  snow[ilon[icam],ilat[icam],]                      # snow wat eqv in 3 dimensions
 }
 
 # save data (after 2014 only)
