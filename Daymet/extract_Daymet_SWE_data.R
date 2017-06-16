@@ -59,17 +59,11 @@ lon <- ncvar_get(ncin, "lon")
 #save to dataframe
 #data <- data.frame(Date=date, SWE=swe[ilon,ilat,], Camera="Sand 1")
 #data1 <- data.frame(Date=date, SWE=swe[ilon,ilat,], Camera="Sand 2")
-#data2 <- data.frame(Date=date, SWE=swe[ilon,ilat,], Camera="Zeal 3")
-#data3 <- data.frame(Date=date, SWE=swe[ilon,ilat,], Camera="Jeff1")
-#data4 <- data.frame(Date=date, SWE=swe[ilon,ilat,], Camera="Jeff2")
-#data5 <- data.frame(Date=date, SWE=swe[ilon,ilat,], Camera="Zeal 3")
-#data6 <- data.frame(Date=date, SWE=swe[ilon,ilat,], Camera="Kil8")
-#data7 <- data.frame(Date=date, SWE=swe[ilon,ilat,], Camera="Kil6")
+
 # combine and save to csv
 #morecams20132014<-rbind(data, data1)
 #write.csv(morecams20132014, file = "moreDaymet_bestcamsNH_2013_2014.csv")
 
-######## HELP please
 # find daymet cell nearest to each camera location
   # loop through cameras
 for (icam in which(cam_tiles$Tile == tile_id)) # I changed this for when you have more than 1 tile
