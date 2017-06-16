@@ -48,8 +48,6 @@ lat <- ncvar_get(ncin, "lat")
 lon <- ncvar_get(ncin, "lon") 
 #swe <- ncvar_get(ncin, "swe") # you don't need this yet unless you follow option 1 below (i.e. do swe calculations here instead of in winter metrics)
 
-} #close loop here?
-
 # find daymet cell nearest to camera location
   # one camera at a time
 #dlat <- abs(lat-camsNH[camera,]$Lat)
@@ -73,12 +71,12 @@ lon <- ncvar_get(ncin, "lon")
 for (icam in which(cam_tiles$Tile == tile_id)) # I changed this for when you have more than 1 tile
 {
   camera <- which(camsNH$Camera == camera_names[icam])
-  dlat[icam]  <- abs(lat-camsNH[camera,]$Lat)
-  dlon[icam]  <- abs(lon-camsNH[camera,]$Lon)
-  dlatlon[icam]  <- dlat + dlon
-  ilatlon[icam]  <- which(dlatlon == min(dlatlon))  # 1-dimensional lat/lon value
-  ilat[icam]  <- ceiling(ilatlon/nrow(lat))         # lat value in 2 dimensions
-  ilon[icam]  <- ilatlon - ((ilat - 1) * nrow(lat)) # lon value in 2 dimensions
+  dlat <- abs(lat-camsNH[camera,]$Lat)
+  dlon  <- abs(lon-camsNH[camera,]$Lon)
+  dlatlon <- dlat + dlon
+  ilatlon  <- which(dlatlon == min(dlatlon))  # 1-dimensional lat/lon value
+  ilat  <- ceiling(ilatlon/nrow(lat))         # lat value in 2 dimensions
+  ilon  <- ilatlon - ((ilat - 1) * nrow(lat)) # lon value in 2 dimensions
   #swe[ilon,ilat,]                    # snow wat eqv in 3 dimensions
   #  You have a couple options:
   #    1. You could do all your calculations (winter metrics) here, working with one year at a time, one tile at a time, and one camera at a time.  Or...
@@ -110,3 +108,4 @@ save(cam_tiles, file="cam_tiles.RData")
        } # end year loop
     } # end camera loop
 
+data <- data.frame(Date=date, Camera=camera, SWE=swe)
