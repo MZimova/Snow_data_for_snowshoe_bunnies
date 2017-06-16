@@ -29,7 +29,9 @@ for (icam in 1:length(camera_names))
 }
 cam_tiles <- data.frame(Name=camera_names, Tile=tiles)
 
-# This loop opens each tile that contains cameras only once (you'll want this once you start dealing with multiple tiles -- for now, it will only read in 12115 as you had)
+
+# This loop opens each tile that contains cameras only once (you'll want this once you start dealing with multiple tiles 
+  # for now, it will only read in 12115 as you had)
 for (tile_id in unique(cam_tiles$Tile))
 {
   
@@ -45,6 +47,8 @@ ncin <- nc_open(paste0(tile_id,"_2003_2004_swe.nc"))
 lat <- ncvar_get(ncin, "lat") 
 lon <- ncvar_get(ncin, "lon") 
 #swe <- ncvar_get(ncin, "swe") # you don't need this yet unless you follow option 1 below (i.e. do swe calculations here instead of in winter metrics)
+
+} #close loop here?
 
 # find daymet cell nearest to camera location
   # one camera at a time
@@ -94,14 +98,15 @@ save(cam_tiles, file="cam_tiles.RData")
 
 # Then, in winter_metrics, you'll want to loop over cameras and years and use Tile, lat_index and lon_index columns in cam_tiles to get the appropriate tile and pixel matching the camera.
 #    Like so:
-#    for (camera in 1:length(cam_tiles)
-#    {
-#       for (year in 1980:2015)
-#       {
-#          ncin <- nc_open(paste0(cam_tiles$Tile[camera],"_",year,"_",year+1,"_swe.nc"))
-#          time <-ncvar_get(ncin, "time")
-#          date <- as.Date("1980-01-01") + time
-#          swe <- ncvar_get(ncin, "swe")
-#          winter_metric_1 <- function_for_winter_metric_1(swe[cam_tiles$lon_index,cam_tiles$lat_index,])
-#       } # end year loop
-#    } # end camera loop
+    for (camera in 1:length(cam_tiles))
+    {
+       for (year in 1980:2015)
+       {
+          ncin <- nc_open(paste0(cam_tiles$Tile[camera],"_",year,"_",year+1,"_swe.nc"))
+          time <-ncvar_get(ncin, "time")
+          date <- as.Date("1980-01-01") + time
+          swe <- ncvar_get(ncin, "swe")
+          #winter_metric_1 <- function_for_winter_metric_1(swe[cam_tiles$lon_index,cam_tiles$lat_index,])
+       } # end year loop
+    } # end camera loop
+
