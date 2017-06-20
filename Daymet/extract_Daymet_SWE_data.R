@@ -10,6 +10,7 @@ setwd('///Volumes/Seagate/Daymet')
 
 # open camera locations data
 camsNH <-read.csv("/Users/marketzimova/Documents/WORK/DISSERTATION/3 Camera Traps Study/camera locations/NH/hare_locs_NH_VT_Rileybatch.csv", header=T,sep=",")
+#camsNH <-read.csv("data/hare_locs_NH_VT_Rileybatch.csv", header=T,sep=",")
 
 load("tile_locs.RData") # load tile lat/lon info for matching tiles w/ cameras
 
@@ -39,6 +40,7 @@ for (tile_id in unique(cam_tiles$Tile))
 # Kil6, Kil8, Kins2, Jef1, Jef2, Zeal3 are in 12115; Sand1,Sand2 are in 11935
 ncin <- nc_open(paste0(tile_id,"_2003_2004_swe.nc"))
 #ncin <- nc_open("12115_2003_2004_swe.nc")
+  #ncin <- nc_open(paste0('data/daymet/',tile_id,"_2015_2016_swe.nc"))
 
 # extract variables
 #time <-ncvar_get(ncin, "time") #time <- get.var.ncdf(ncin, "time") # you don't need this yet since you are just extracting lat + lon
@@ -96,16 +98,21 @@ save(cam_tiles, file="cam_tiles.RData")
 
 # Then, in winter_metrics, you'll want to loop over cameras and years and use Tile, lat_index and lon_index columns in cam_tiles to get the appropriate tile and pixel matching the camera.
 #    Like so:
-    for (camera in 1:length(cam_tiles))
-    {
-       for (year in 1980:2015)
-       {
+swe_df <- NULL
+for (tile in unique(cam_tiles$Tile))
+{
+   for (year in 1980:2015)
+   {
+      for (camera in which(cam_tiles$Tile == tile_id))
+      {
           ncin <- nc_open(paste0(cam_tiles$Tile[camera],"_",year,"_",year+1,"_swe.nc"))
           time <-ncvar_get(ncin, "time")
           date <- as.Date("1980-01-01") + time
           swe <- ncvar_get(ncin, "swe")
+      swe_df <- rbind(swe_df, name = rep(cam_tiles$Name[camera], date = date, swe = swe))
           #winter_metric_1 <- function_for_winter_metric_1(swe[cam_tiles$lon_index,cam_tiles$lat_index,])
-       } # end year loop
-    } # end camera loop
+      } # end camera loop
+   } # end year loop
+} # end tile loop
 
-data <- data.frame(Date=date, Camera=camera, SWE=swe)
+#data <- data.frame(Date=date, Camera=camera, SWE=swe)
