@@ -21,8 +21,8 @@ for (tile in unique(cam_tiles$Tile))
   {
     
     # Read in one daymet file, corresponding to one tile and year
-    #ncin <- nc_open(paste0(tile,"_",year,"_",year+1,"_swe.nc"))
-    ncin <- nc_open(paste0('data/daymet/',tile,"_",year,"_",year+1,"_swe.nc"))
+    ncin <- nc_open(paste0(tile,"_",year,"_",year+1,"_swe.nc"))
+    #ncin <- nc_open(paste0('data/daymet/',tile,"_",year,"_",year+1,"_swe.nc"))
     time <-ncvar_get(ncin, "time")
     date <- as.Date("1980-01-01") + time
     swe <- ncvar_get(ncin, "swe")
@@ -48,6 +48,6 @@ for (tile in unique(cam_tiles$Tile))
   } # end year loop
 } # end tile loop
 
-# Create df with Camera name, Date and SWE
-# but it's strange Date and empty SWE
-data <- write.csv(cbind(Date=date, Camera=camera, SWE=swe), file = "xxx.csv")
+# Create csv with Camera name, Date and SWE
+data <- write.csv(swe_df, file = "xxx.csv")
+
