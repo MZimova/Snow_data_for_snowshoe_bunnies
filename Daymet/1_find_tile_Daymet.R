@@ -1,8 +1,18 @@
 # Alex Bryan 
-# Function that extracts lat and lon bounds for each Daymet tile
 # June 2017
+# Function that extracts lat and lon bounds for each Daymet tile
+  # All tiles from NH, VT, CO and Canada (=tile_ids)
+  # Saves tile_locs.RData file in wd (don't delete)
 
+# Load package
+library(ncdf4)
 
+# Set wd
+setwd('///Volumes/Seagate/Daymet')
+#setwd('C:/cygwin/home/abryan/data/obs/daymet')
+#setwd('C:/Users/ABRYAN/Documents/proj-active/snowshoe_hare')
+
+# Tile names
 tile_ids <- c(11376,11377,
               11556,11557,
               11935,
@@ -10,12 +20,6 @@ tile_ids <- c(11376,11377,
               12453,12454,
               12631,12632,12633,
               12811,12812,12813)
-
-library(ncdf4)
-
-setwd('///Volumes/Seagate/Daymet')
-#setwd('C:/cygwin/home/abryan/data/obs/daymet')
-#setwd('C:/Users/ABRYAN/Documents/proj-active/snowshoe_hare')
 
 lats <- matrix(NA, length(tile_ids), 2) # ncol = 2, nrow = length(tiles)
 lons <- matrix(NA, length(tile_ids), 2)
@@ -49,6 +53,7 @@ for (itile in 1:length(tile_ids))
   lons[itile,] <- round(range(lon_na, na.rm=T))
 }
 
+# Save as RData in wd
 save(tile_ids, lats, lons, file = "tile_locs.RData")
 
 # ### TESTING

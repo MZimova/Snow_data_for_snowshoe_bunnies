@@ -17,7 +17,7 @@ swe_df <- NULL
 for (tile in unique(cam_tiles$Tile))
 {
   #for (year in 2015:2015)
-  for (year in 2012:2013)
+  for (year in 2010:2016)
   {
     
     # Read in one daymet file, corresponding to one tile and year
@@ -39,9 +39,9 @@ for (tile in unique(cam_tiles$Tile))
       # used rep to copy the camera 365x to match the length of date and swe; and rbind to append new rows with each loop
       swe_df <- rbind(swe_df,
                       data.frame(
-                        name = rep(cam_tiles$Name[camera],length(date)), 
-                        date = date, 
-                        swe = swe[ilon,ilat,]
+                        Camera = rep(cam_tiles$Name[camera],length(date)), 
+                        Date = date, 
+                        SWE = swe[ilon,ilat,]
                       ))
       #winter_metric_1 <- function_for_winter_metric_1(swe[cam_tiles$lon_index,cam_tiles$lat_index,])
     } # end camera loop
@@ -49,5 +49,5 @@ for (tile in unique(cam_tiles$Tile))
 } # end tile loop
 
 # Create csv with Camera name, Date and SWE
-data <- write.csv(swe_df, file = "xxx.csv")
+data <- write.csv(swe_df, file = "/Users/marketzimova/Documents/WORK/DISSERTATION/3 Camera Traps Study/analysis SNOW/Daymet/data/Daymet_allCO_2010_2016.csv")
 
