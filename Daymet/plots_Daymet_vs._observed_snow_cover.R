@@ -32,36 +32,38 @@ setwd('//Users/marketzimova/Documents/WORK/DISSERTATION/3 Camera Traps Study/ana
 daymet$Date<-mdy(daymet$Date); photos$Date<-mdy(photos$Date)
 # merge datasets
 merged <- merge(x=daymet, y=photos[,c("Date","Snow","Any_snow","Camera")], by = c("Camera","Date"), all.x = TRUE, sort = FALSE)
-# add more variables
-merged$Year<-year(merged$Date); merged$fYear<-factor(merged$Year); merged$Julian<-yday(merged$Date)
-merged$any<-NA; merged$any[merged$Any_snow==1]<-5 #snow presence
-merged$none<-NA; merged$none[merged$Any_snow==0]<--5 #snow absence
-str(merged)
-names(table(merged$Camera))
+#names(table(merged$Camera))
 
+  # add more variables
+merged$Year<-year(merged$Date); merged$fYear<-factor(merged$Year); merged$Julian<-yday(merged$Date)
+# create snow/no snow cover dummy variable
+  #merged$any<-NA; merged$any[merged$Any_snow==1]<-1 #snow presence; merged$none<-NA; merged$none[merged$Any_snow==0]<-0 #snow absence
+  merged$snowbin <- ifelse(merged$Any_snow > 0, 1, merged$Any_snow)
+# create snow/no snow SWE dummy variable
+  merged$SWEbin <- ifelse(merged$SWE > 0.0001, 1, merged$SWE)
+  str(merged)
 
 
 ########### Plot Daymet vs. % snow cover for each camera and save to pdf 
+  #test
+  ggplot(subset(merged, Camera == "Ivan0032010")) +
+    geom_line(aes(Date, SWEbin)) +
+    geom_point(aes(Date, snowbin), color="red") +
+    theme_light()
+  
   myplots <- lapply(unique(merged$Camera), 
                     function(id) 
                       ggplot(subset(merged, Camera == id)) +
-                      geom_line(aes(Date, SWE)) +
-                      geom_point(aes(Date, Snow), color="blue") +
-                      geom_point(aes(Date, any), color="red",shape=20) +
-                      geom_point(aes(Date, none), color="red",shape=20) +
-                      ylim(-5,400) + 
-                      xlim(range(merged$Date)) +
+                      geom_line(aes(Date, SWEbin)) +
+                      geom_point(aes(Date, snowbin), color="red") +
+                      theme_light() +
                       facet_wrap(~Camera))
   #do.call(gridExtra::grid.arrange, myplots[1:12])
-  #library(grid)
-  #grid.arrange(rectGrob(), rectGrob())
   ml <- marrangeGrob(myplots, nrow=1, ncol=1)
-  ## non-interactive use, multipage pdf
   ggsave("multipage.pdf", ml)
   beep()
   
   
-
 # Test, not work right
   # library(ggplus) #devtools::install_github("guiastrennec/ggplus")
   # myplot <- ggplot(merged) + 
@@ -71,15 +73,8 @@ names(table(merged$Camera))
   # facet_multiple(plot = myplot, facets = 'Camera', ncol = 5, nrow = 5)
   # dev.off() 
   # beep()
-  
-  # ggplot(subset(merged, Camera == "Ivan0032010")) +
-  #   geom_line(aes(Date, SWE)) +
-  #   geom_point(aes(Date, Snow), color="blue") +
-  #   geom_point(aes(Date, any), color="red",shape=20) +
-  #   geom_point(aes(Date, none), color="red",shape=20) +
-  #   ylim(-5,400)  
-  #   xlim(range(merged$Date)) 
-  
+    
+    
 # Archived:
   #merged <- merge(photos, daymet, by = c("Camera","Date"), all = TRUE, sort = FALSE)
   #binded <-rbind.fill(depth,daymet) # rbind by rows despite uneven # of columns
