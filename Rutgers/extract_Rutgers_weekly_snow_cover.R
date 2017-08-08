@@ -21,56 +21,34 @@ lat <- ncvar_get(ncin, "latitude") #lat <- get.var.ncdf(ncin, "lat")
 lon <- ncvar_get(ncin, "longitude") #lon <- get.var.ncdf(ncin, "lon")
 snow <- ncvar_get(ncin, "snow_cover_extent") #swe <- get.var.ncdf(ncin, "swe")
 
-# find Rutgers cell nearest to camera location
-  #one camera at a time
-# camera <- which(camsNH$Camera == "Kil6")
-# dlat <- abs(lat-camsNH[camera,]$Lat)
-# dlon <- abs(lon-camsNH[camera,]$Lon)
-# dlatlon <- dlat + dlon
-# ilatlon <- which(dlatlon == min(dlatlon))  # 1-dimensional lat/lon value
-# ilat <- ceiling(ilatlon/nrow(lat))         # lat value in 2 dimensions
-# ilon <- ilatlon - ((ilat - 1) * nrow(lat)) # lon value in 2 dimensions
-# snow[ilon,ilat,]                    # snow wat eqv in 3 dimensions
-# 
-# #save data set
-# data <- data.frame(Date=date, Snow=snow[ilon,ilat,], Camera="Kil6")
-# write.csv(data,"weeklyRutgers.csv")
-
-#### PLEASE HELP W FUNCTION
-# find Rutgers cell nearest to each camera location
-  # loop through cameras
-ilat <- numeric(length = length(camera_names))
-ilon <- numeric(length = length(camera_names))
-for (icam in 1:length(camera_names))
+# loop through cameras
+icam=which(camsNH$Camera == 'CLNA2') # one camera at a time
+#for (icam in 1:length(camera_names))
 {
+  # find Rutgers cell nearest to each camera location
   camera <- which(camsNH$Camera == camera_names[icam])
   dlat  <- abs(lat-camsNH[camera,]$Lat)
   dlon  <- abs(lon-camsNH[camera,]$Lon)
   dlatlon  <- dlat + dlon
   ilatlon  <- which(dlatlon == min(dlatlon))  # 1-dimensional lat/lon value
-  ilat[icam]  <- ceiling(ilatlon/nrow(lat))         # lat value in 2 dimensions
-  ilon[icam]  <- ilatlon - ((ilat[icam] - 1) * nrow(lat)) # lon value in 2 dimensions
-  snow[ilon[icam],ilat[icam],]                      # snow wat eqv in 3 dimensions
-}
-
-# save lat/lon indices that correspond to each camera in a separate data frame
-cam_latlon <- data.frame(name = camera_names, lat_ind = ilat, lon_ind = ilon)
-
-# save data (after 2014 only)
-# this won't work because date and snow are 2,644 values (weeks) long and camera_names, ilat, and ilon are 43 (cameras) long
-#data <- data.frame(Date=date, Name=camera_names, Snow=snow[ilon,ilat,], Lat=ilat, Lon=ilon)
-datasubset <-subset(data, data$Date > "2014-01-01")
-
-# instead, you'll just do all your calculations using snow[cam_latlon$lon_ind[camera], cam_latlon$lat_ind[camera],] as in the procedure I added at the end of extract_daymet... (that should technically go in winter_metrics):
-for (camera in 1:length(camera_names))
-{
-  for (year in 1966:2015) # you can change the start year to 2014 to correspond with your camera data
+  ilat  <- ceiling(ilatlon/nrow(lat))         # lat value in 2 dimensions
+  ilon  <- ilatlon - ((ilat - 1) * nrow(lat)) # lon value in 2 dimensions
+  #snow[ilon,ilat,]                      # snow wat eqv in 3 dimensions
+  
+  color = 'lightblue4'
+  #if (elevation > 300) {color = 'lightblue3'} 
+  #if (elevation > 400) {color = 'lightblue2'} 
+  #if (elevation > 500) {color = 'lightblue1'}
+  
+  year=2014 # one year at a time
+  #for (year in 1980:2016) # all years
   {
+    
     time_subset <- which(date >= paste0(year,"-07-01") & date < paste0(year+1,"-07-01"))
-     
-    # do your calculations using:
-    snow[cam_latlon$lon_ind[camera],cam_latlon$lat_ind[camera],time_subset]
+    plot(snow[ilon,ilat,time_subset] ~ date[time_subset], col = 'red', pch = 2, cex = 2.)
+    points(camera_snow, add=T, col = color)
+    
   } # end year loop
+  
 } # end camera loop
-
 
