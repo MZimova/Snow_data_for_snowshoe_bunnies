@@ -78,9 +78,9 @@ for (icam in 1:length(camera_names))
     # = First date in the fall when snow>0 and stays >0 for at least 7 days 
     # = First date in the spring when snow<1 and stays <1 for at least 7 days 
     dates_year <- dates[iyear]
-    first_snowday <- as.Date(paste0('1980-',format(dates_year[which(snowdays_year)[1]], '%m-%d')))
-    last_snowday  <- as.Date(paste0('1980-',format(dates_year[which(snowdays_year)[length(which(snowdays_year))]], '%m-%d')))
-    
+    first_snowday <- as.Date(dates_year[which(snowdays_year)[1]], '%m-%d-%y') #Alex had: as.Date(paste0('1980-',format(dates_year[which(snowdays_year)[1]], '%m-%d')))
+    last_snowday  <- as.Date(dates_year[which(snowdays_year)[length(which(snowdays_year))]], '%m-%d-%y') # Alex had: as.Date(paste0('1980-',format(dates_year[which(snowdays_year)[length(which(snowdays_year))]], '%m-%d')))
+
     # 3. Number of snow melts for each season
     # = Number of times snow flips between >0 and < 0 
     snow_melts <- length(rle(snowdays_year>0)$lengths) # rle= length of consecutive snow days
@@ -99,7 +99,9 @@ for (icam in 1:length(camera_names))
                             N_snow_fall    = nsnowdays_fall,
                             N_snow_spring  = nsnowdays_spring,
                             First_snow     = first_snowday,
+                            First_snow_Jul = format(first_snowday,"%j"),
                             Last_snow      = last_snowday,
+                            Last_snow_Jul  = format(last_snowday,"%j"),
                             Melts          = snow_melts,
                             Longest_streak = longest_streak
                           ))
@@ -117,6 +119,11 @@ for (icam in 1:length(camera_names))
   #                  ))
   
 } # end camera loop
+
+# Create df with all cameras and snow
+#print(paste(camera_names[icam],ilon,ilat))
+data <- write.csv(snow_year_df, file = "analysis SNOW/Rutgers/weekly data/Rutgers_NH_1980_2016.csv", row.names = F)
+
 
 camera='CLNA1'
 camera_metrics <- snow_year_df[snow_year_df$Camera == camera, ]
@@ -141,7 +148,4 @@ plot(Last_snow      ~ Year, data = camera_metrics)
 plot(Melts          ~ Year, data = camera_metrics)
 plot(Longest_streak ~ Year, data = camera_metrics)
 
-# Create df with all cameras and snow
-print(paste(camera_names[icam],ilon,ilat))
-data <- write.csv(snow_year_df, file = "Rutgers_NH_1980_2016.csv", row.names = F)
 
