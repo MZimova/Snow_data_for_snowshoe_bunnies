@@ -8,17 +8,16 @@
 library(ncdf4)
 
 # Load camera data
-#setwd('//Users/marketzimova/Documents/WORK/DISSERTATION/3 Camera Traps Study/analysis SNOW/Rutgers/weekly')
-setwd('C:/Users/ABRYAN/Documents/proj-active/snowshoe_hare')
-# delete camsNH <-read.csv("/Users/marketzimova/Documents/WORK/DISSERTATION/3 Camera Traps Study/camera locations/NH/hare_locs_NH_VT_Rileybatch.csv", header=T,sep=",")
-#camsNH <-read.csv("data/hare_locs_NH_VT_Rileybatch.csv", header=T,sep=",")
+setwd('//Users/marketzimova/Documents/WORK/DISSERTATION/3 Camera Traps Study')
+#setwd('C:/Users/ABRYAN/Documents/proj-active/snowshoe_hare')
 cameras <-read.csv("data/NH_hare_data2.csv", header=T,sep=",")
 camera_names <-names(table(cameras$Camera)) #all cameras
 # camera_names=c("CLNA1","CLNA10","CLNA2","CLNA4","CLNA6","CLNA7","CLNA8","CLTC4","Jeff1","Jeff2","Jeff3","Jeff4","Jeff5","Kil10","Kil2","Kil3","Kil5","Kil6","Kil7","Kil8","Kil9","Kins2","Kins3","Kins4","Nul10","Nul11","Nul13","Nul14","Nul15","Nul16","Nul17","Nul18","Nul19","Nul20","Nul9","VB1","VB2","VB3","VB4","VB5","VB6","VB7","VB8") #few good ones
 cameras$date<-as.Date(cameras$Date, format = "%m/%d/%y")
 
 # Load Rutgers data
-ncin <- nc_open("data/nhsce_v01r01_19661004_20170605.nc")
+# ncin <- nc_open("data/nhsce_v01r01_19661004_20170605.nc")
+ncin <- nc_open("analysis SNOW/Rutgers/weekly data/nhsce_v01r01_19661004_20170501.nc")
 ncin
 
 # extract variables
@@ -54,22 +53,20 @@ for (icam in 1:length(camera_names))
   
   #color = 'lightblue4'
   #if (camera_obs$Elevation > 300) {color = 'lightblue4'};if (camera_obs$Elevation > 500) {color = 'lightblue3'}, if (camera_obs$Elevation > 700) {color = 'lightblue2'};if (camera_obs$Elevation > 900) {color = 'lightblue1'}
-  
-  #year=2016 # one year at a time
+
+      # Calculate snow metrics for each camera for each year (1980-2016) and season 
+        #fall: 7/1-12/31, spring: 1/1-6/30  
+
   # note you can go as far back as 1967 if you want
   # 1981 corresponds to the 1980-1981 winter
-  for (year in 1981:2016) # all years
+  for (year in 1981:2016) # all years,  if want one year at a time try: year=2016
   {
-    
     iyear   <- dates >= as.Date(paste0(year-1,'-07-01')) & dates <= as.Date(paste0(year  ,'-06-30'))
     ifall   <- dates >= as.Date(paste0(year-1,'-07-01')) & dates <= as.Date(paste0(year-1,'-12-31'))
     ispring <- dates >= as.Date(paste0(year  ,'-01-01')) & dates <= as.Date(paste0(year  ,'-06-30'))
     
-    # Snow metrics for each camera for EACH YEAR (1980-2016) and EACH SEASON (fall: Jul through Dec, spring: Jan through Jun)
-    
     # 1. Number of snow days in the fall and in the spring
     # = Total # days when snow cover > 0
-    # You previously had:               
     snowdays_year   <- snow[ilon, ilat, iyear  ] > 0
     snowdays_fall   <- snow[ilon, ilat, ifall  ] > 0
     snowdays_spring <- snow[ilon, ilat, ispring] > 0
@@ -80,18 +77,16 @@ for (icam in 1:length(camera_names))
     # 2. First snow-on and snow -off date each year
     # = First date in the fall when snow>0 and stays >0 for at least 7 days 
     # = First date in the spring when snow<1 and stays <1 for at least 7 days 
-    # You previously had:  
     dates_year <- dates[iyear]
     first_snowday <- as.Date(paste0('1980-',format(dates_year[which(snowdays_year)[1]], '%m-%d')))
     last_snowday  <- as.Date(paste0('1980-',format(dates_year[which(snowdays_year)[length(which(snowdays_year))]], '%m-%d')))
     
-    
     # 3. Number of snow melts for each season
-    # = Number of times snow flips between >0 and < 0 (i assume you mean "= 0") ;-)
-    snow_melts <- length(rle(snowdays_year>0)$lengths)
-    
+    # = Number of times snow flips between >0 and < 0 
+    snow_melts <- length(rle(snowdays_year>0)$lengths) # rle= length of consecutive snow days
+   
     # A few other metrics:
-    # longest stretch with snow on the ground
+    # longest stretch with snow on the ground during winter
     longest_streak <- max(rle(snowdays_year>0)$lengths[rle(snowdays_year>0)$values==T])
     
     snow_year_df <- rbind(snow_year_df,
@@ -146,11 +141,7 @@ plot(Last_snow      ~ Year, data = camera_metrics)
 plot(Melts          ~ Year, data = camera_metrics)
 plot(Longest_streak ~ Year, data = camera_metrics)
 
-
-# CAN YOU PLS FIX CODE BELOW SO IT PRINTS OUT DF W/ ALL CAMS 1980-2016?
-#   I think you had done this right -- I just switched out with new data frame
 # Create df with all cameras and snow
-                print(paste(camera_names[icam],ilon,ilat))
-#data <- write.csv(snow_df, file = "Rutgers_NH_1980_2016.csv")
+print(paste(camera_names[icam],ilon,ilat))
 data <- write.csv(snow_year_df, file = "Rutgers_NH_1980_2016.csv", row.names = F)
 
